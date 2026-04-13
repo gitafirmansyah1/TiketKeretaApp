@@ -15,26 +15,78 @@ public class MainApp {
         System.out.println("=== DAFTAR KERETA ===");
         trainService.showAllTrain();
 
-        System.out.print("Pilih kode kereta: ");
-        String kode = input.nextLine().toUpperCase();
+        Train selectedTrain = null;
+        while (selectedTrain == null) {
+            try {
+                System.out.print("Pilih kode kereta: ");
+                String kode = input.nextLine().toUpperCase();
 
-        Train selectedTrain = trainService.getTrain(kode);
+                selectedTrain = trainService.getTrain(kode);
 
-        if (selectedTrain == null) {
-            System.out.println("Kereta tidak ditemukan!");
-            return;
+                if (selectedTrain == null) {
+                    throw new Exception("Kereta tidak ditemukan!");
+                }
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
 
-        System.out.print("Masukkan nama: ");
-        String nama = input.nextLine();
+        String nama = "";
+        while (true) {
+            try {
+                System.out.print("Masukkan nama: ");
+                nama = input.nextLine();
+
+                if (!nama.matches("[a-zA-Z ]+")) {
+                    throw new Exception("Nu bener we!!");
+                }
+
+                break;
+
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
 
         Customer customer = new Customer(nama, "12345");
 
-        System.out.print("Pilih jenis (1 = Ekonomi, 2 = Bisnis): ");
-        int jenis = input.nextInt();
+        int jenis = 0;
+        while (true) {
+            try {
+                System.out.print("Pilih jenis (1 = Ekonomi, 2 = Bisnis): ");
+                jenis = input.nextInt();
 
-        System.out.print("Jumlah tiket: ");
-        int jumlah = input.nextInt();
+                if (jenis != 1 && jenis != 2) {
+                    throw new Exception("Pilihan hanya 1 atau 2!");
+                }
+
+                break;
+
+            } catch (Exception e) {
+                System.out.println("Input harus angka 1 atau 2!");
+                input.nextLine(); 
+            }
+        }
+
+
+        int jumlah = 0;
+        while (true) {
+            try {
+                System.out.print("Jumlah tiket: ");
+                jumlah = input.nextInt();
+
+                if (jumlah <= 0) {
+                    throw new Exception("Jumlah tiket harus lebih dari 0!");
+                }
+
+                break;
+
+            } catch (Exception e) {
+                System.out.println("Input harus angka yang valid!");
+                input.nextLine(); // bersihkan buffer
+            }
+        }
 
         Seat seat = new Seat(1);
 
@@ -42,11 +94,8 @@ public class MainApp {
 
         if (jenis == 1) {
             tiket = new EconomyTicket("T001", customer, selectedTrain, seat);
-        } else if (jenis == 2) {
-            tiket = new BusinessTicket("T002", customer, selectedTrain, seat);
         } else {
-            System.out.println("Jenis tidak valid!");
-            return;
+            tiket = new BusinessTicket("T002", customer, selectedTrain, seat);
         }
 
         double total = tiket.hitungHarga() * jumlah;
@@ -57,7 +106,6 @@ public class MainApp {
         System.out.println("Jenis: " + (jenis == 1 ? "Ekonomi" : "Bisnis"));
         System.out.println("Jumlah tiket: " + jumlah);
         System.out.println("Total bayar: " + total);
-
 
         Payment bayar = new CashPayment();
         bayar.bayar(total);
